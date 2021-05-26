@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Traffic Control Simulator</string>
+
+
+    <string-array name="Lights">
+        <item>Red</item>
+        <item>Green</item>
+    </string-array>
+
+    <string-array name="Controller">
+        <item>A</item>
+        <item>B</item>
+        <item>Pedestrian</item>
+    </string-array>
+
+</resources>
