@@ -1,0 +1,155 @@
+// variables for street A
+const int GREEN_A = 2;
+const int YELLOW_A = 3;
+const int RED_A = 4;
+const int DELAY_GREEN_A = 5000;
+const int DELAY_YELLOW_A = 2000;
+const int DELAY_RED_A = 5000;
+const int BUTTON_A = 48;
+int BUTTON_STATE_A = 0;
+int NUM_CARS_A = 0;
+const int CARS_A1 = 9;
+const int CARS_A2 = 10;
+const int CARS_A3 = 11;
+
+//variables for street B
+const int GREEN_B = 49;
+const int YELLOW_B = 51;
+const int RED_B = 53;
+const int DELAY_GREEN_B = 5000;
+const int DELAY_YELLOW_B = 2000;
+const int DELAY_RED_B = 5000;
+const int BUTTON_B = 50;
+int BUTTON_STATE_B = 0;
+int NUM_CARS_B = 0;
+const int CARS_B1 = 41;
+const int CARS_B2 = 43;
+const int CARS_B3 = 45;
+
+//variables for the crosswalk
+const int GREEN_P = 6;
+const int RED_P = 7;
+const int DELAY_GEEN_P = 5000;
+const int DELAY_RED_P = 5000;
+const int BUTTON_P = 52;
+int BUTTON_STATE_P = 0;
+
+// basic functions
+void setup() {
+  Serial.begin(9600);
+  pinMode(GREEN_A, OUTPUT);
+  pinMode(YELLOW_A, OUTPUT);
+  pinMode(RED_A, OUTPUT);
+  pinMode(GREEN_B, OUTPUT);
+  pinMode(YELLOW_B, OUTPUT);
+  pinMode(RED_B, OUTPUT);
+  pinMode(GREEN_P, OUTPUT);
+  pinMode(RED_P, OUTPUT);
+  pinMode(BUTTON_A, INPUT);
+  pinMode(BUTTON_B, INPUT);
+  pinMode(BUTTON_P, INPUT);
+  pinMode(CARS_A1, OUTPUT);
+  pinMode(CARS_A2, OUTPUT);
+  pinMode(CARS_A3, OUTPUT);
+  pinMode(CARS_B1, OUTPUT);
+  pinMode(CARS_B2, OUTPUT);
+  pinMode(CARS_B3, OUTPUT);
+}
+
+void green_light() {
+  digitalWrite(GREEN_A, HIGH);
+  digitalWrite(YELLOW_A, LOW);
+  digitalWrite(RED_A, LOW);
+  digitalWrite(GREEN_B, LOW);
+  digitalWrite(YELLOW_B, LOW);
+  digitalWrite(RED_B, HIGH);
+  digitalWrite(GREEN_P, LOW);
+  digitalWrite(RED_P, HIGH);
+}
+
+void yellow_lightA() {
+  digitalWrite(GREEN_A, LOW);
+  digitalWrite(YELLOW_A, HIGH);
+  digitalWrite(RED_A, LOW);
+  digitalWrite(GREEN_B, LOW);
+  digitalWrite(YELLOW_B, LOW);
+  digitalWrite(RED_B, HIGH);
+  digitalWrite(GREEN_P, LOW);
+  digitalWrite(RED_P, HIGH);
+}
+
+void yellow_lightB() {
+  digitalWrite(GREEN_A, LOW);
+  digitalWrite(YELLOW_A, LOW);
+  digitalWrite(RED_A, HIGH);
+  digitalWrite(GREEN_B, LOW);
+  digitalWrite(YELLOW_B, HIGH);
+  digitalWrite(RED_B, LOW);
+  digitalWrite(GREEN_P, HIGH);
+  digitalWrite(RED_P, LOW);
+}
+
+void red_light() {
+  digitalWrite(GREEN_A, LOW);
+  digitalWrite(YELLOW_A, LOW);
+  digitalWrite(RED_A, HIGH);
+  digitalWrite(GREEN_B, HIGH);
+  digitalWrite(YELLOW_B, LOW);
+  digitalWrite(RED_B, LOW);
+  digitalWrite(GREEN_P, HIGH);
+  digitalWrite(RED_P, LOW);
+}
+
+void car_lights_A() {
+  BUTTON_STATE_A = digitalRead(BUTTON_A);
+  if (BUTTON_STATE_A == HIGH) {
+    NUM_CARS_A = NUM_CARS_A + 1;
+    if (NUM_CARS_A >= 11) {
+      digitalWrite(CARS_A3, HIGH);
+    }
+    if (NUM_CARS_A >= 6) {
+      digitalWrite(CARS_A2, HIGH);
+    }
+    if (NUM_CARS_A >= 1) {
+      digitalWrite(CARS_A1, HIGH);
+    }
+    Serial.print(NUM_CARS_A);
+    Serial.println();
+  }
+}
+
+void car_lights_B() {
+  BUTTON_STATE_B = digitalRead(BUTTON_B);
+  if (BUTTON_STATE_B == HIGH) {
+    NUM_CARS_B = NUM_CARS_B + 1;
+    if (NUM_CARS_B >= 11) {
+      digitalWrite(CARS_B3, HIGH);
+    }
+    if (NUM_CARS_B >= 6) {
+      digitalWrite(CARS_B2, HIGH);
+    }
+    if (NUM_CARS_B >= 1) {
+      digitalWrite(CARS_B1, HIGH);
+    }
+    Serial.print(NUM_CARS_B);
+    Serial.println();
+  }
+}
+
+void loop() {
+  BUTTON_STATE_P = digitalRead(BUTTON_P);
+  green_light();
+  car_lights_B();
+  delay(DELAY_GREEN_A);
+  yellow_lightA();
+  car_lights_A();
+  car_lights_B();
+  delay(DELAY_YELLOW_A);
+  red_light();
+  car_lights_A();
+  delay(DELAY_RED_A);
+  yellow_lightB();
+  car_lights_A();
+  car_lights_B();
+  delay(DELAY_YELLOW_B);
+}
