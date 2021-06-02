@@ -1,42 +1,69 @@
-// variables for street A
-const int GREEN_A = 2;
-const int YELLOW_A = 3;
-const int RED_A = 4;
-const int DELAY_GREEN_A = 5000;
-const int DELAY_YELLOW_A = 2000;
-const int DELAY_RED_A = 5000;
-const int BUTTON_A = 48;
+#include <SPI.h>
+#include <Ethernet.h>
+
+/**
+ * Variables for the conection to the Firebase via proxy
+ */
+byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
+char serverName[] = "10.42.0.1";
+IPAddress ip(10, 42, 0 , 5);
+int serverPort = 8000;
+EthernetClient client;
+char pageAdd[64];
+
+/**
+ * Variables and constants for street A
+ */
+const int GREEN_A = 22;
+const int YELLOW_A = 24;
+const int RED_A = 26;
+const int BUTTON_A = 31;
 int BUTTON_STATE_A = 0;
 int NUM_CARS_A = 0;
-const int CARS_A1 = 9;
-const int CARS_A2 = 10;
-const int CARS_A3 = 11;
+const int CARS_A1 = 32;
+const int CARS_A2 = 34;
+const int CARS_A3 = 36;
+String STREET_STATE_A = "";
+String PREV_ST_STATE_A = "Green";
 
-//variables for street B
-const int GREEN_B = 49;
-const int YELLOW_B = 51;
-const int RED_B = 53;
-const int DELAY_GREEN_B = 5000;
-const int DELAY_YELLOW_B = 2000;
-const int DELAY_RED_B = 5000;
-const int BUTTON_B = 50;
+/**
+ * Variables and constants for street B
+ */
+const int GREEN_B = 38;
+const int YELLOW_B = 40;
+const int RED_B = 42;
+const int BUTTON_B = 33;
 int BUTTON_STATE_B = 0;
 int NUM_CARS_B = 0;
-const int CARS_B1 = 41;
-const int CARS_B2 = 43;
-const int CARS_B3 = 45;
+const int CARS_B1 = 44;
+const int CARS_B2 = 46;
+const int CARS_B3 = 48;
 
-//variables for the crosswalk
-const int GREEN_P = 6;
-const int RED_P = 7;
-const int DELAY_GEEN_P = 5000;
-const int DELAY_RED_P = 5000;
-const int BUTTON_P = 52;
+/**
+ * variables and constants for the crosswalk
+ */
+const int GREEN_P = 28;
+const int RED_P = 30;
+const int BUTTON_P = 35;
 int BUTTON_STATE_P = 0;
+int NUM_PEDESTRIANS = 0;
+String STREET_STATE_B = "";
 
-// basic functions
+/**
+ * Start Ethernet conection
+ * Prepare the input and output elements
+ * Define default state as green for street A
+ */
 void setup() {
   Serial.begin(9600);
+  pinMode(4, OUTPUT);
+  digitalWrite(4, HIGH);
+  Serial.println(F("Starting ethernet..."));
+  Ethernet.begin(mac, ip);
+  digitalWrite(10, HIGH);
+  Serial.println(Ethernet.localIP());
+  delay(2000);
+  Serial.println(F("Ready"));
   pinMode(GREEN_A, OUTPUT);
   pinMode(YELLOW_A, OUTPUT);
   pinMode(RED_A, OUTPUT);
@@ -54,8 +81,13 @@ void setup() {
   pinMode(CARS_B1, OUTPUT);
   pinMode(CARS_B2, OUTPUT);
   pinMode(CARS_B3, OUTPUT);
+  green_light();
 }
 
+/**
+ * Set green light for street A
+ * Meaning red light for street B and crosswalk
+ */
 void green_light() {
   digitalWrite(GREEN_A, HIGH);
   digitalWrite(YELLOW_A, LOW);
@@ -67,6 +99,10 @@ void green_light() {
   digitalWrite(RED_P, HIGH);
 }
 
+/**
+ * Set yellow light for street A
+ * Keeping red light for street B and crosswalk
+ */
 void yellow_lightA() {
   digitalWrite(GREEN_A, LOW);
   digitalWrite(YELLOW_A, HIGH);
@@ -78,6 +114,10 @@ void yellow_lightA() {
   digitalWrite(RED_P, HIGH);
 }
 
+/**
+ * Set yellow light for street B
+ * Keeping red light for street A and green for the crosswalk
+ */
 void yellow_lightB() {
   digitalWrite(GREEN_A, LOW);
   digitalWrite(YELLOW_A, LOW);
@@ -89,6 +129,10 @@ void yellow_lightB() {
   digitalWrite(RED_P, LOW);
 }
 
+/**
+ * Set red light for street A
+ * Meaning green light for street B and crosswalk
+ */
 void red_light() {
   digitalWrite(GREEN_A, LOW);
   digitalWrite(YELLOW_A, LOW);
@@ -100,6 +144,10 @@ void red_light() {
   digitalWrite(RED_P, LOW);
 }
 
+/**
+ * Read input from the button and increment number of cars on street A
+ * Update values on Firebase
+ */
 void car_lights_A() {
   BUTTON_STATE_A = digitalRead(BUTTON_A);
   if (BUTTON_STATE_A == HIGH) {
@@ -113,11 +161,16 @@ void car_lights_A() {
     if (NUM_CARS_A >= 1) {
       digitalWrite(CARS_A1, HIGH);
     }
-    Serial.print(NUM_CARS_A);
+    sprintf(pageAdd, "/update.php?arduino_data[street1_cars]=%d", NUM_CARS_A);
+    getPage(serverName, serverPort, pageAdd);
     Serial.println();
   }
 }
 
+/**
+ * Read input from the button and increment number of cars on street B
+ * Update values on Firebase
+ */
 void car_lights_B() {
   BUTTON_STATE_B = digitalRead(BUTTON_B);
   if (BUTTON_STATE_B == HIGH) {
@@ -131,25 +184,188 @@ void car_lights_B() {
     if (NUM_CARS_B >= 1) {
       digitalWrite(CARS_B1, HIGH);
     }
-    Serial.print(NUM_CARS_B);
+    sprintf(pageAdd, "/update.php?arduino_data[street2_cars]=%d", NUM_CARS_B);
+    getPage(serverName, serverPort, pageAdd);
     Serial.println();
   }
 }
 
-void loop() {
+/**
+ * Read input from the button and increment number of pedestrians at the crosswalk
+ * Update values on Firebase
+ */
+void pedestrians() {
   BUTTON_STATE_P = digitalRead(BUTTON_P);
-  green_light();
-  car_lights_B();
-  delay(DELAY_GREEN_A);
-  yellow_lightA();
-  car_lights_A();
-  car_lights_B();
-  delay(DELAY_YELLOW_A);
-  red_light();
-  car_lights_A();
-  delay(DELAY_RED_A);
-  yellow_lightB();
-  car_lights_A();
-  car_lights_B();
-  delay(DELAY_YELLOW_B);
+  if (BUTTON_STATE_P == HIGH) {
+    NUM_PEDESTRIANS = NUM_PEDESTRIANS + 1;
+    sprintf(pageAdd, "/update.php?arduino_data[street1_pedestrians]=%d", NUM_PEDESTRIANS);
+    getPage(serverName, serverPort, pageAdd);
+    Serial.println();
+  }
+}
+
+/**
+ * Reset number of cars on street A
+ * Update values on Firebase
+ */
+void flush_A() {
+  NUM_CARS_A = 0;
+  digitalWrite(CARS_A3, LOW);
+  digitalWrite(CARS_A2, LOW);
+  digitalWrite(CARS_A1, LOW);
+  sprintf(pageAdd, "/update.php?arduino_data[street1_cars]=%d", NUM_CARS_A);
+  getPage(serverName, serverPort, pageAdd);
+  Serial.println();
+}
+
+/**
+ * Reset number of cars on street B
+ * Update values on Firebase
+ */
+void flush_B() {
+  NUM_CARS_B = 0;
+  digitalWrite(CARS_B3, LOW);
+  digitalWrite(CARS_B2, LOW);
+  digitalWrite(CARS_B1, LOW);
+  sprintf(pageAdd, "/update.php?arduino_data[street2_cars]=%d", NUM_CARS_B);
+  getPage(serverName, serverPort, pageAdd);
+  Serial.println();
+}
+
+/**
+ * Reset number of pedestrians at the crosswalk
+ * Update values on Firebase
+ */
+void flush_P() {
+  NUM_PEDESTRIANS = 0;
+  sprintf(pageAdd, "/update.php?arduino_data[street1_pedestrians]=%d", NUM_PEDESTRIANS);
+  getPage(serverName, serverPort, pageAdd);
+  Serial.println();
+}
+
+/**
+ * Connect to Firebase
+ * Read and write information on Firebase
+ * Disconect from Firebase
+ */
+byte getPage(char *ipBuf, int thisPort, char *page) {
+  int inChar;
+  char outBuf[128];
+  Serial.print(F("connecting..."));
+  if(client.connect(ipBuf, thisPort)) {
+    Serial.println(F("connected"));
+    sprintf(outBuf,"GET %s HTTP/1.1", page);
+    client.println(outBuf);
+    sprintf(outBuf,"Host: %s", serverName);
+    client.println(outBuf);
+    client.println(F("Connection: close\r\n"));
+  } 
+  else {
+    Serial.println(F("failed"));
+    return 0;
+  }
+  int connectLoop = 0;
+  while(client.connected()) {
+    while(client.available()) {
+      inChar = client.read();
+      Serial.write(inChar);
+      connectLoop = 0;
+    }
+    connectLoop++;
+    if(connectLoop > 10000) {
+      Serial.println();
+      Serial.println(F("Timeout"));
+      client.stop();
+    }
+    delay(250);
+  }
+  Serial.println();
+  Serial.println(F("disconnecting."));
+  client.stop();
+  return 1;
+}
+
+/**
+ * Connect to Firebase
+ * Read and write state of street A on Firebase
+ * Disconect from Firebase
+ */
+byte readStreetA(char *ipBuf, int thisPort, char *page) {
+  char inChar;
+  char outBuf[128];
+  STREET_STATE_A = "";
+  bool reading = false;
+  Serial.print(F("connecting..."));
+  if(client.connect(ipBuf, thisPort)) {
+    Serial.println(F("connected"));
+    sprintf(outBuf,"GET %s HTTP/1.1", page);
+    client.println(outBuf);
+    sprintf(outBuf,"Host: %s", serverName);
+    client.println(outBuf);
+    client.println(F("Connection: close\r\n"));
+  } 
+  else {
+    Serial.println(F("failed"));
+    return 0;
+  }
+  int connectLoop = 0;
+  while(client.connected()) {
+    while(client.available()) {
+      inChar = client.read();
+       if (reading && inChar != '"') {
+        STREET_STATE_A += inChar;
+      }
+      if (inChar == '"') {
+        reading = !reading;
+      }
+      Serial.write(inChar);
+      connectLoop = 0;
+    }
+    connectLoop++;
+    if(connectLoop > 10000) {
+      Serial.println();
+      Serial.println(F("Timeout"));
+      client.stop();
+    }
+    delay(250);
+  }
+  Serial.println();
+  Serial.println(F("disconnecting."));
+  client.stop();
+  return 1;
+}
+
+/**
+ * Increment the number of cars on the streets and the crosswalk only when there is a red light
+ * Read street A light state on Firebase (STREET_STATE_A)
+ * Change the light of the streets according to the state on Firebase
+ * Reset number of cars on the streets when the light is yellow
+ * Reset number of pedestrians at the crosswalk when street A has red light
+ */
+void loop() {
+  if (PREV_ST_STATE_A == "Red") {
+    car_lights_A();
+  }
+  if (PREV_ST_STATE_A == "Green") {
+    car_lights_B();
+    pedestrians();
+  }
+  sprintf(pageAdd, "/read_street1.php");
+  readStreetA(serverName, serverPort, pageAdd);
+  Serial.println();
+  if(PREV_ST_STATE_A == "Green" && STREET_STATE_A == "Red") {
+    yellow_lightA();
+    flush_A();
+    delay(1000);
+    red_light();
+    PREV_ST_STATE_A = STREET_STATE_A;    
+  }
+  else if(PREV_ST_STATE_A == "Red" && STREET_STATE_A == "Green") {
+    yellow_lightB();
+    flush_B();
+    delay(1000);
+    flush_P();
+    green_light();    
+    PREV_ST_STATE_A = STREET_STATE_A;    
+  }
 }
