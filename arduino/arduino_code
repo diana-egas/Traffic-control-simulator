@@ -245,7 +245,7 @@ void flush_P() {
 
 /**
  * Connect to Firebase
- * Read and write information on Firebase
+ * Write information on Firebase
  * Disconect from Firebase
  */
 byte getPage(char *ipBuf, int thisPort, char *page) {
@@ -287,7 +287,7 @@ byte getPage(char *ipBuf, int thisPort, char *page) {
 
 /**
  * Connect to Firebase
- * Read and write state of street A on Firebase
+ * Read state of street A on Firebase
  * Disconect from Firebase
  */
 byte readStreetA(char *ipBuf, int thisPort, char *page) {
