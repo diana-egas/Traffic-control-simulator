@@ -31,6 +31,8 @@ public class MainActivity2 extends AppCompatActivity {
     String light;
     String trafficlight;
     ImageView road;
+    String currStreet1 = "Green";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +74,7 @@ public class MainActivity2 extends AppCompatActivity {
                 String cars2 = snapshot.child("street2_cars").getValue().toString();
                 String street1 = snapshot.child("street1").getValue().toString();
                 String street2 = snapshot.child("street2").getValue().toString();
-                String pedestrian1 = snapshot.child("street1_pedestrians").getValue().toString();
+                //String pedestrian1 = snapshot.child("street1_pedestrians").getValue().toString();
                 //String pedestrian2= snapshot.child("street2_pedestrians").getValue().toString();
 
                 carros1.setText(cars1);
@@ -81,51 +83,32 @@ public class MainActivity2 extends AppCompatActivity {
                 //Acrescentar timers e imagens yellow
                 //ImageView road = findViewById(R.id.imageView2);
 
-                if (street1.equals("Green") && street2.equals("Red") && pedestrian1.equals("Red")) {
 
-                    road.setImageResource(R.drawable.estado4);
 
-                    Timer myTimer = new Timer();
-                    TimerTask t = new TimerTask() {
-                        @Override
-                        public void run() {
-                            runOnUiThread(new Runnable() {
+                if (street1.equals("Green") && street2.equals("Red")){
 
-                                @Override
-                                public void run() {
-                                    road.setImageResource(R.drawable.estado1);
-                                }
-                            });
-                        }
-                    };
+                    road.setImageResource(R.drawable.estado1);
 
-                    myTimer.schedule(t, 1000);
-
-                } else if (street1.equals("Red") && street2.equals("Green") && pedestrian1.equals("Green")) {
-
+                }
+                else if (street1.equals("Yellow") && street2.equals("Red")) {
                     road.setImageResource(R.drawable.estado2);
 
-                    Timer myTimer = new Timer();
-                    TimerTask t = new TimerTask() {
-                        @Override
-                        public void run() {
-                            runOnUiThread(new Runnable() {
+                }
+                else if (street1.equals("Red") && street2.equals("Green")) {
+                    road.setImageResource(R.drawable.estado3);
 
-                                @Override
-                                public void run() {
-                                    road.setImageResource(R.drawable.estado3);
-
-                                }
-                            });
-
-                        }
-                    };
-
-                    myTimer.schedule(t, 1000);
+                }
+                else if (street1.equals("Red") && street2.equals("Yellow")) {
+                    road.setImageResource(R.drawable.estado4);
 
                 }
 
+
+
+
+
             }
+
 
             @Override
             public void onCancelled(DatabaseError error) {
