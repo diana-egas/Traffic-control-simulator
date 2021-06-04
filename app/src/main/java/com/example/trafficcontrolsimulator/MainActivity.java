@@ -18,16 +18,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
         configureNextButton();
-
-
-        //FirebaseDatabase database = FirebaseDatabase.getInstance();
-        //DatabaseReference myRef = database.getReference().child("Message");
-
-        //myRef.setValue("Hello, World!");
-
     }
 
     private void configureNextButton() {

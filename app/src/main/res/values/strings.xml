@@ -8,9 +8,9 @@
     </string-array>
 
     <string-array name="Controller">
-        <item>A</item>
-        <item>B</item>
-        <item>Pedestrian</item>
+        <item>vertical</item>
+        <item>horizontal</item>
+        <item>pedestre</item>
     </string-array>
 
 </resources>
