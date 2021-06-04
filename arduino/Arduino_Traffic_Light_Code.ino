@@ -97,6 +97,7 @@ void green_light() {
   digitalWrite(RED_B, HIGH);
   digitalWrite(GREEN_P, LOW);
   digitalWrite(RED_P, HIGH);
+  flush_A();
 }
 
 /**
@@ -142,6 +143,8 @@ void red_light() {
   digitalWrite(RED_B, LOW);
   digitalWrite(GREEN_P, HIGH);
   digitalWrite(RED_P, LOW);
+  flush_B();
+  flush_P();
 }
 
 /**
@@ -198,7 +201,7 @@ void pedestrians() {
   BUTTON_STATE_P = digitalRead(BUTTON_P);
   if (BUTTON_STATE_P == HIGH) {
     NUM_PEDESTRIANS = NUM_PEDESTRIANS + 1;
-    sprintf(pageAdd, "/update.php?arduino_data[street1_pedestrians]=%d", NUM_PEDESTRIANS);
+    sprintf(pageAdd, "/update.php?arduino_data[pedestrian_number]=%d", NUM_PEDESTRIANS);
     getPage(serverName, serverPort, pageAdd);
     Serial.println();
   }
@@ -355,17 +358,14 @@ void loop() {
   Serial.println();
   if(PREV_ST_STATE_A == "Green" && STREET_STATE_A == "Red") {
     yellow_lightA();
-    flush_A();
     delay(1000);
     red_light();
     PREV_ST_STATE_A = STREET_STATE_A;    
   }
   else if(PREV_ST_STATE_A == "Red" && STREET_STATE_A == "Green") {
     yellow_lightB();
-    flush_B();
     delay(1000);
-    flush_P();
-    green_light();    
+    green_light();
     PREV_ST_STATE_A = STREET_STATE_A;    
   }
 }
