@@ -3,18 +3,27 @@ from ligacao import Variaveis
 import time
 
 x  = Variaveis()
+
 while True:
     x.atualizar()
-    #print(time.time())
+    print(time.time())
     x.Android()
-    print("Android")
-    x.Congestionamento1()
-    print("CONG1")
-    x.Congestionamento2()
-    print("CONG2")
-    x.temporizador_15_rua1()
-    print("TEMP1")
-    x.temporizador_15_rua2()
+    #quando semaforo vermelho
+    if(x.semaforo1 =="Red"):
+        x.Congestionamento1()
+    if(x.semaforo2 =="Red"):
+        x.Congestionamento2()
+
+    if(x.semaforo1 =="Red"):
+        x.temporizador_15_rua1()
+    else:
+        x.tempo1 = 0
+
+    if(x.semaforo2 =="Red"):
+        x.temporizador_15_rua2()
+    else:
+        x.tempo2 = 0
+
     print("TEMP2")
     time.sleep(1)
 
